@@ -1,1 +1,116 @@
-<p>lineas-maquinaria works!</p>
+<div class="min-vh-100 bg-very-dark py-4 px-3">
+  <div class="container-xl">
+
+    <!-- Header -->
+    <div class="mb-4">
+      <h1 class="text-warning fw-bold mb-1">Líneas de Producción PET</h1>
+      <p class="text-secondary mb-0">Selecciona una línea y un componente para ver sus repuestos</p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Accordion Column -->
+      <div class="col-12 col-lg-4">
+        <div class="accordion" id="accordionLineas">
+          @for (linea of lineas; track linea.nombre; let i = $index) {
+            <div class="accordion-item bg-dark border-secondary">
+              <h2 class="accordion-header">
+                <button
+                  class="accordion-button collapsed bg-dark text-white fw-semibold"
+                  [class.active-linea]="lineaAbierta === linea.nombre"
+                  type="button"
+                  (click)="toggleLinea(linea.nombre)"
+                >
+                  <i class="bi {{ linea.icono }} me-2 text-warning"></i>
+                  {{ linea.nombre }}
+                  <span class="badge bg-warning text-dark ms-auto me-2 small">{{ linea.componentes.length }}</span>
+                </button>
+              </h2>
+              @if (lineaAbierta === linea.nombre) {
+                <div class="accordion-body p-0">
+                  <ul class="list-group list-group-flush">
+                    @for (comp of linea.componentes; track comp.nombre) {
+                      <li
+                        class="list-group-item bg-dark text-white border-secondary list-item-comp"
+                        [class.active-comp]="componenteActivo === linea.nombre + '-' + comp.nombre"
+                        role="button"
+                        (click)="seleccionarComponente(linea.nombre, comp)"
+                      >
+                        <i class="bi bi-chevron-right me-2 small text-warning"></i>
+                        {{ comp.nombre }}
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Results Column -->
+      <div class="col-12 col-lg-8">
+        @if (cargando) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-secondary mt-2">Buscando repuestos...</p>
+          </div>
+        } @else if (resultados.length > 0) {
+          <div class="mb-3">
+            <span class="text-secondary">Repuestos encontrados: </span>
+            <span class="text-warning fw-bold">{{ resultados.length }}</span>
+          </div>
+
+          <div class="row g-3">
+            @for (item of resultados; track item.MATERIAL) {
+              <div class="col-12 col-sm-6 col-xl-4">
+                <div class="card bg-dark border-secondary result-card h-100" (click)="seleccionarRepuesto(item)" role="button">
+                  <div class="card-img-top-wrapper">
+                    @if (item.ENLACE_IMAGEN) {
+                      <img [src]="item.ENLACE_IMAGEN" [alt]="item.DESCRIPCION_SAP" class="card-img-top" />
+                    } @else {
+                      <div class="no-image d-flex align-items-center justify-content-center">
+                        <i class="bi bi-image text-secondary fs-2"></i>
+                      </div>
+                    }
+                  </div>
+                  <div class="card-body p-2">
+                    <p class="card-text text-white small mb-1 text-truncate fw-semibold">{{ item.DESCRIPCION_SAP }}</p>
+                    <p class="card-text mb-1">
+                      <span class="badge bg-warning text-dark small">{{ item.MATERIAL }}</span>
+                    </p>
+                    <p class="card-text text-secondary small mb-0 text-truncate">
+                      <i class="bi bi-geo-alt me-1"></i>{{ item.UBICACION || 'Sin ubicación' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else if (componenteActivo) {
+          <div class="text-center py-5">
+            <i class="bi bi-inbox text-secondary" style="font-size: 3rem;"></i>
+            <p class="text-secondary mt-2">No se encontraron repuestos para este componente.</p>
+          </div>
+        } @else {
+          <div class="text-center py-5">
+            <i class="bi bi-hand-index text-secondary" style="font-size: 3rem;"></i>
+            <p class="text-secondary mt-2">Selecciona una línea y un componente del panel izquierdo.</p>
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Modal Hijo -->
+    @if (repuestoSeleccionado) {
+      <app-repuesto-detalle
+        [repuesto]="repuestoSeleccionado"
+        (cerrar)="cerrarModal()"
+      ></app-repuesto-detalle>
+    }
+
+  </div>
+</div>

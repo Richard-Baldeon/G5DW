@@ -1,0 +1,13 @@
+.bg-very-dark {
+  background-color: #121212;
+}
+
+.form-control:focus {
+  border-color: #f0a500;
+  box-shadow: 0 0 0 0.2rem rgba(240, 165, 0, 0.25);
+}
+
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+}

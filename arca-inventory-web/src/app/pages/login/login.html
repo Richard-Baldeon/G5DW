@@ -1,1 +1,59 @@
-<p>login works!</p>
+<div class="min-vh-100 bg-very-dark d-flex align-items-center justify-content-center py-4 px-3">
+  <div class="card bg-dark border-warning shadow-lg" style="max-width: 420px; width: 100%;">
+
+    <div class="card-body p-4 text-center">
+
+      <!-- Logo -->
+      <div class="mb-4">
+        <span class="text-warning fw-bold" style="font-size: 2rem;">ARCA</span>
+        <span class="text-white fw-light" style="font-size: 1.5rem;"> Inventory</span>
+        <p class="text-secondary small mt-1 mb-0">Sistema de Gestión de Repuestos</p>
+      </div>
+
+      <form (ngSubmit)="ingresar()" class="text-start">
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small text-uppercase">Correo Electrónico</label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark border-secondary text-warning">
+              <i class="bi bi-envelope-fill"></i>
+            </span>
+            <input
+              type="email"
+              class="form-control bg-dark text-white border-secondary"
+              placeholder="usuario@arcacontinental.com"
+              [(ngModel)]="correo"
+              name="correo"
+            />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary small text-uppercase">Contraseña</label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark border-secondary text-warning">
+              <i class="bi bi-lock-fill"></i>
+            </span>
+            <input
+              type="password"
+              class="form-control bg-dark text-white border-secondary"
+              placeholder="••••••••"
+              [(ngModel)]="contrasena"
+              name="contrasena"
+            />
+          </div>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-warning fw-semibold py-2">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar
+          </button>
+        </div>
+
+      </form>
+
+      <p class="text-secondary small mt-4 mb-0">Arca Continental Lindley &mdash; Mantenimiento</p>
+
+    </div>
+  </div>
+</div>

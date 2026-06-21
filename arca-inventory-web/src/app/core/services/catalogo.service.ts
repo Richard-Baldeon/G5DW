@@ -21,6 +21,19 @@ export class CatalogoService {
     );
   }
 
+  buscarPorProveedor(proveedor: string): Observable<Repuesto[]> {
+    const regex = new RegExp(proveedor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    return this.getAll().pipe(
+      map(repuestos => repuestos.filter(r => regex.test(r.PROVEEDOR_MAQUINA)))
+    );
+  }
+
+  existeCodigo(codigo: string): Observable<boolean> {
+    return this.buscarPorCodigo(codigo).pipe(
+      map(r => r !== undefined)
+    );
+  }
+
   buscarPorDescripcion(termino: string): Observable<Repuesto[]> {
     const pattern = termino
       .trim()
