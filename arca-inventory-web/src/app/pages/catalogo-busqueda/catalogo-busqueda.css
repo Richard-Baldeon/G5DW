@@ -1,0 +1,40 @@
+.bg-very-dark {
+  background-color: #121212;
+}
+
+.form-control:focus {
+  border-color: #f0a500;
+  box-shadow: 0 0 0 0.2rem rgba(240, 165, 0, 0.25);
+}
+
+.result-card {
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.result-card:hover {
+  border-color: #f0a500 !important;
+  transform: translateY(-2px);
+}
+
+.card-img-top-wrapper {
+  height: 140px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  background: #1a1a1a;
+}
+
+.nav-link {
+  border-radius: 20px !important;
+}

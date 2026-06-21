@@ -1,1 +1,172 @@
-<p>repuesto-detalle works!</p>
+@if (repuesto) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-content bg-dark text-white rounded-3 shadow-lg" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-warning">
+        <h5 class="mb-0 text-warning fw-bold">Detalle del Repuesto</h5>
+        <button class="btn btn-warning btn-sm fw-semibold" (click)="cerrarModal()">
+          Cerrar Ventana
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body-content p-3">
+        <div class="row g-3">
+
+          <!-- Image -->
+          <div class="col-12 col-md-5 text-center">
+            @if (repuesto.ENLACE_IMAGEN) {
+              <img
+                [src]="repuesto.ENLACE_IMAGEN"
+                [alt]="repuesto.DESCRIPCION_SAP"
+                class="img-fluid rounded border border-secondary"
+                style="max-height: 300px; object-fit: contain; background: #1a1a1a;"
+              />
+            } @else {
+              <div class="not-found-img d-flex align-items-center justify-content-center rounded border border-secondary">
+                <div class="text-center text-secondary">
+                  <i class="bi bi-image fs-1 d-block mb-2"></i>
+                  <span class="fw-semibold">NOT FOUND</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Data Fields -->
+          <div class="col-12 col-md-7">
+            <div class="d-flex flex-column gap-2">
+
+              <!-- Código SAP -->
+              <div class="field-row">
+                <span class="field-label">Código SAP</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value text-warning fw-bold">{{ repuesto.MATERIAL }}</span>
+                  <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.MATERIAL, 'MATERIAL')" title="Copiar">
+                    <i class="bi" [class.bi-clipboard]="copiadoField !== 'MATERIAL'" [class.bi-check-lg]="copiadoField === 'MATERIAL'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Descripción -->
+              <div class="field-row">
+                <span class="field-label">Descripción</span>
+                <div class="d-flex align-items-start gap-2">
+                  <span class="field-value">{{ repuesto.DESCRIPCION_SAP }}</span>
+                  <button class="btn btn-sm btn-outline-warning py-0 px-1 flex-shrink-0" (click)="copiar(repuesto.DESCRIPCION_SAP, 'DESCRIPCION')" title="Copiar">
+                    <i class="bi" [class.bi-clipboard]="copiadoField !== 'DESCRIPCION'" [class.bi-check-lg]="copiadoField === 'DESCRIPCION'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Ubicación -->
+              <div class="field-row">
+                <span class="field-label">Ubicación</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">{{ repuesto.UBICACION || '—' }}</span>
+                  @if (repuesto.UBICACION) {
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.UBICACION, 'UBICACION')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'UBICACION'" [class.bi-check-lg]="copiadoField === 'UBICACION'"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Precio -->
+              <div class="field-row">
+                <span class="field-label">Precio</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">S/ {{ repuesto.PRECIO | number:'1.2-2' }}</span>
+                  <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.PRECIO.toString(), 'PRECIO')" title="Copiar">
+                    <i class="bi" [class.bi-clipboard]="copiadoField !== 'PRECIO'" [class.bi-check-lg]="copiadoField === 'PRECIO'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Proveedor/Máquina -->
+              <div class="field-row">
+                <span class="field-label">Proveedor / Máquina</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">{{ repuesto.PROVEEDOR_MAQUINA || '—' }}</span>
+                  @if (repuesto.PROVEEDOR_MAQUINA) {
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.PROVEEDOR_MAQUINA, 'PROVEEDOR')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'PROVEEDOR'" [class.bi-check-lg]="copiadoField === 'PROVEEDOR'"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- N/P Proveedor -->
+              <div class="field-row">
+                <span class="field-label">N/P Proveedor</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">{{ repuesto.NP_PROVEEDOR || '—' }}</span>
+                  @if (repuesto.NP_PROVEEDOR) {
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.NP_PROVEEDOR, 'NP_PROVEEDOR')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'NP_PROVEEDOR'" [class.bi-check-lg]="copiadoField === 'NP_PROVEEDOR'"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Fabricante -->
+              <div class="field-row">
+                <span class="field-label">Fabricante</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">{{ repuesto.FABRICANTE_COMPONENTE || '—' }}</span>
+                  @if (repuesto.FABRICANTE_COMPONENTE) {
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.FABRICANTE_COMPONENTE, 'FABRICANTE')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'FABRICANTE'" [class.bi-check-lg]="copiadoField === 'FABRICANTE'"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- N/P Fabricante -->
+              <div class="field-row">
+                <span class="field-label">N/P Fabricante</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">{{ repuesto.NP_FABRICANTE || '—' }}</span>
+                  @if (repuesto.NP_FABRICANTE) {
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.NP_FABRICANTE, 'NP_FABRICANTE')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'NP_FABRICANTE'" [class.bi-check-lg]="copiadoField === 'NP_FABRICANTE'"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Medidas -->
+              <div class="field-row">
+                <span class="field-label">Medidas</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="field-value">{{ repuesto.MEDIDAS || '—' }}</span>
+                  @if (repuesto.MEDIDAS) {
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1" (click)="copiar(repuesto.MEDIDAS, 'MEDIDAS')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'MEDIDAS'" [class.bi-check-lg]="copiadoField === 'MEDIDAS'"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Texto Extendido -->
+              @if (repuesto.TEXTO_EXTENDIDO) {
+                <div class="field-row">
+                  <span class="field-label">Texto Extendido</span>
+                  <div class="d-flex align-items-start gap-2">
+                    <span class="field-value small">{{ repuesto.TEXTO_EXTENDIDO }}</span>
+                    <button class="btn btn-sm btn-outline-warning py-0 px-1 flex-shrink-0" (click)="copiar(repuesto.TEXTO_EXTENDIDO, 'TEXTO')" title="Copiar">
+                      <i class="bi" [class.bi-clipboard]="copiadoField !== 'TEXTO'" [class.bi-check-lg]="copiadoField === 'TEXTO'"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
