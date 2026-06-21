@@ -1,1 +1,94 @@
-<p>home works!</p>
+<div class="min-vh-100 bg-very-dark py-4 px-3">
+  <div class="container-xl">
+
+    <!-- Header -->
+    <div class="mb-4">
+      <h1 class="text-warning fw-bold mb-1">Panel Principal</h1>
+      <p class="text-secondary mb-0">Bienvenido al sistema de inventario de repuestos</p>
+    </div>
+
+    <!-- Cards Row -->
+    <div class="row g-4">
+
+      <!-- Card 1: Catálogo de Repuestos -->
+      <div class="col-12 col-lg-6">
+        <div class="card bg-dark border-warning h-100">
+          <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center gap-2">
+            <i class="bi bi-archive-fill"></i>
+            Catálogo de Repuestos
+          </div>
+          <div class="card-body d-flex flex-column gap-3">
+
+            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3">
+              <span class="text-secondary">Total de repuestos</span>
+              <span class="text-warning fw-bold fs-4">18,602</span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3">
+              <span class="text-secondary">Con fotografía</span>
+              <span class="text-white fw-semibold">8,231</span>
+            </div>
+
+            <div>
+              <div class="d-flex justify-content-between mb-1">
+                <span class="text-secondary small">Digitalización</span>
+                <span class="text-warning fw-semibold">44%</span>
+              </div>
+              <div class="progress" style="height: 10px; background-color: #333;">
+                <div
+                  class="progress-bar bg-warning"
+                  role="progressbar"
+                  style="width: 44%"
+                  aria-valuenow="44"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+            </div>
+
+            <div class="mt-auto pt-2">
+              <a routerLink="/catalogo" class="btn btn-warning w-100 fw-semibold text-dark">
+                Ir al Catálogo
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Líneas PET -->
+      <div class="col-12 col-lg-6">
+        <div class="card bg-dark border-warning h-100">
+          <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center gap-2">
+            <i class="bi bi-diagram-3-fill"></i>
+            Líneas PET
+          </div>
+          <div class="card-body d-flex flex-column gap-3">
+
+            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3">
+              <span class="text-secondary">Máquinas registradas</span>
+              <span class="text-warning fw-bold fs-4">7</span>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+              @for (linea of lineasPET; track linea) {
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-warning text-dark">PET</span>
+                  <span class="text-white small">{{ linea }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="mt-auto pt-2">
+              <a routerLink="/lineas" class="btn btn-outline-warning w-100 fw-semibold">
+                Ver Líneas
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

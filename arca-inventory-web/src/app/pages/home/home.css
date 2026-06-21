@@ -1,0 +1,13 @@
+.bg-very-dark {
+  background-color: #121212;
+}
+
+.card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card-header {
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+}
