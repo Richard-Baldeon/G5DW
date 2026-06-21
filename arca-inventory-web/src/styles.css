@@ -1,1 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --arca-dark: #1E1E1E;
+  --arca-gold: #FFC107;
+  --arca-light: #F8F9FA;
+}
+
+body {
+  background-color: var(--arca-dark);
+  color: var(--arca-light);
+}

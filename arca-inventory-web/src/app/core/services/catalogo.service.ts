@@ -17,14 +17,14 @@ export class CatalogoService {
 
   buscarPorCodigo(codigo: string): Observable<Repuesto | undefined> {
     return this.getAll().pipe(
-      map(repuestos => repuestos.find(r => r.MATERIAL === codigo.trim()))
+      map(repuestos => repuestos.find(r => String(r.MATERIAL).trim() === codigo.trim()))
     );
   }
 
   buscarPorProveedor(proveedor: string): Observable<Repuesto[]> {
     const regex = new RegExp(proveedor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     return this.getAll().pipe(
-      map(repuestos => repuestos.filter(r => regex.test(r.PROVEEDOR_MAQUINA)))
+      map(repuestos => repuestos.filter(r => r.PROVEEDOR_MAQUINA && regex.test(String(r.PROVEEDOR_MAQUINA))))
     );
   }
 
@@ -43,7 +43,7 @@ export class CatalogoService {
       .join('.*');
     const regex = new RegExp(pattern, 'i');
     return this.getAll().pipe(
-      map(repuestos => repuestos.filter(r => regex.test(r.DESCRIPCION_SAP)))
+      map(repuestos => repuestos.filter(r => r.DESCRIPCION_SAP && regex.test(String(r.DESCRIPCION_SAP))))
     );
   }
 }
