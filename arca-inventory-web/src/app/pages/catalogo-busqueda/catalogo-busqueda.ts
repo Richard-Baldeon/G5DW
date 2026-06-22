@@ -24,6 +24,29 @@ export class CatalogoBusqueda {
 
   constructor(private catalogoService: CatalogoService) {}
 
+  cambiarModo(modo: 'codigo' | 'descripcion'): void {
+    this.modoActivo = modo;
+    this.mensajeError = '';
+    if (modo === 'descripcion' && !this.terminoDescripcion.trim()) {
+      this.cargarPorDefecto();
+    }
+  }
+
+  cargarPorDefecto(): void {
+    this.buscando = true;
+    this.mensajeError = '';
+    this.catalogoService.getAll().subscribe({
+      next: (todos) => {
+        this.buscando = false;
+        this.resultados = todos.slice(0, 12);
+      },
+      error: () => {
+        this.buscando = false;
+        this.mensajeError = 'Error al cargar el catálogo.';
+      }
+    });
+  }
+
   buscarPorCodigo(): void {
     const codigo = this.codigoSAP.trim();
     if (!codigo) return;
@@ -50,7 +73,10 @@ export class CatalogoBusqueda {
 
   buscarPorDescripcion(): void {
     const termino = this.terminoDescripcion.trim();
-    if (!termino) return;
+    if (!termino) {
+      this.cargarPorDefecto();
+      return;
+    }
 
     this.buscando = true;
     this.mensajeError = '';
@@ -87,7 +113,7 @@ export class CatalogoBusqueda {
 
   limpiarDescripcion(): void {
     this.terminoDescripcion = '';
-    this.resultados = [];
     this.mensajeError = '';
+    this.cargarPorDefecto();
   }
 }

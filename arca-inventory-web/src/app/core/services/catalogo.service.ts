@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { Repuesto } from '../models/repuesto.model';
 
 @Injectable({
@@ -12,12 +12,14 @@ export class CatalogoService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Repuesto[]> {
-    return this.http.get<Repuesto[]>(this.dataUrl);
+    return this.http.get<Repuesto[]>(this.dataUrl).pipe(
+      tap(data => console.log('Data cargada:', data.length, 'registros. Ejemplo:', data[0]))
+    );
   }
 
   buscarPorCodigo(codigo: string): Observable<Repuesto | undefined> {
     return this.getAll().pipe(
-      map(repuestos => repuestos.find(r => String(r.MATERIAL).trim() === codigo.trim()))
+      map(repuestos => repuestos.find(r => String(r.MATERIAL).trim() === String(codigo).trim()))
     );
   }
 
@@ -35,15 +37,22 @@ export class CatalogoService {
   }
 
   buscarPorDescripcion(termino: string): Observable<Repuesto[]> {
-    const pattern = termino
-      .trim()
+    // Soporta comodines (*): cada fragmento entre asteriscos debe estar presente.
+    // Comparacion robusta en minusculas para evitar problemas de mayus/minus.
+    const fragmentos = String(termino)
+      .toLowerCase()
       .split('*')
-      .filter(p => p.length > 0)
-      .map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-      .join('.*');
-    const regex = new RegExp(pattern, 'i');
+      .map(f => f.trim())
+      .filter(f => f.length > 0);
+
     return this.getAll().pipe(
-      map(repuestos => repuestos.filter(r => r.DESCRIPCION_SAP && regex.test(String(r.DESCRIPCION_SAP))))
+      map(repuestos => repuestos.filter(r => {
+        if (!r.DESCRIPCION_SAP) {
+          return false;
+        }
+        const desc = String(r.DESCRIPCION_SAP).toLowerCase();
+        return fragmentos.every(f => desc.includes(f));
+      }))
     );
   }
 }
