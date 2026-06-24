@@ -6,7 +6,7 @@
       <p class="text-secondary mb-0">Busca repuestos por código SAP o descripción</p>
     </div>
 
-    <ul class="nav nav-pills mb-4 gap-2">
+<ul class="nav nav-pills mb-4 gap-2">
       <li class="nav-item">
         <button
           class="nav-link fw-semibold"
@@ -16,7 +16,7 @@
           [class.text-warning]="modoActivo !== 'codigo'"
           [class.border-warning]="modoActivo !== 'codigo'"
           [class.border]="modoActivo !== 'codigo'"
-          (click)="modoActivo = 'codigo'"
+          (click)="modoActivo = 'codigo'; resultados = []; mensajeError = ''" 
         >
           <i class="bi bi-upc-scan me-1"></i> Búsqueda por Código SAP
         </button>
@@ -30,7 +30,7 @@
           [class.text-warning]="modoActivo !== 'descripcion'"
           [class.border-warning]="modoActivo !== 'descripcion'"
           [class.border]="modoActivo !== 'descripcion'"
-          (click)="modoActivo = 'descripcion'"
+          (click)="modoActivo = 'descripcion'; resultados = []; mensajeError = ''"
         >
           <i class="bi bi-search me-1"></i> Búsqueda por Descripción
         </button>
