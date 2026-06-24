@@ -1,13 +1,11 @@
 <div class="min-vh-100 bg-very-dark py-4 px-3">
   <div class="container-xl">
 
-    <!-- Header -->
     <div class="mb-4">
       <h1 class="text-warning fw-bold mb-1">Catálogo de Repuestos</h1>
       <p class="text-secondary mb-0">Busca repuestos por código SAP o descripción</p>
     </div>
 
-    <!-- Tabs -->
     <ul class="nav nav-pills mb-4 gap-2">
       <li class="nav-item">
         <button
@@ -39,7 +37,6 @@
       </li>
     </ul>
 
-    <!-- Modo Código SAP (HU01) -->
     @if (modoActivo === 'codigo') {
       <div class="card bg-dark border-secondary">
         <div class="card-body">
@@ -69,7 +66,6 @@
       </div>
     }
 
-    <!-- Modo Descripción (HU02) -->
     @if (modoActivo === 'descripcion') {
       <div class="card bg-dark border-secondary">
         <div class="card-body">
@@ -97,48 +93,46 @@
           </form>
         </div>
       </div>
-
-      <!-- Results -->
-      @if (resultados.length > 0) {
-        <div class="mt-3 mb-2">
-          <span class="text-secondary">Resultados encontrados: </span>
-          <span class="text-warning fw-bold">{{ resultados.length | number }}</span>
-        </div>
-
-        <div class="row g-3">
-          @for (item of resultados; track item.MATERIAL) {
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-              <div class="card bg-dark border-secondary result-card h-100" (click)="seleccionarRepuesto(item)" role="button">
-                <div class="card-img-top-wrapper">
-                  @if (item.ENLACE_IMAGEN) {
-                    <img
-                      [src]="item.ENLACE_IMAGEN"
-                      [alt]="item.DESCRIPCION_SAP"
-                      class="card-img-top"
-                    />
-                  } @else {
-                    <div class="no-image d-flex align-items-center justify-content-center">
-                      <i class="bi bi-image text-secondary fs-2"></i>
-                    </div>
-                  }
-                </div>
-                <div class="card-body p-2">
-                  <p class="card-text text-white small mb-1 text-truncate fw-semibold">{{ item.DESCRIPCION_SAP }}</p>
-                  <p class="card-text mb-1">
-                    <span class="badge bg-warning text-dark small">{{ item.MATERIAL }}</span>
-                  </p>
-                  <p class="card-text text-secondary small mb-0 text-truncate">
-                    <i class="bi bi-geo-alt me-1"></i>{{ item.UBICACION || 'Sin ubicación' }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      }
     }
 
-    <!-- Loading -->
+    @if (resultados.length > 0) {
+      <div class="mt-3 mb-2">
+        <span class="text-secondary">Resultados encontrados: </span>
+        <span class="text-warning fw-bold">{{ resultados.length | number }}</span>
+      </div>
+
+      <div class="row g-3">
+        @for (item of resultados; track item.MATERIAL) {
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card bg-dark border-secondary result-card h-100" (click)="seleccionarRepuesto(item)" role="button">
+              <div class="card-img-top-wrapper">
+                @if (item.ENLACE_IMAGEN) {
+                  <img
+                    [src]="item.ENLACE_IMAGEN"
+                    [alt]="item.DESCRIPCION_SAP"
+                    class="card-img-top"
+                  />
+                } @else {
+                  <div class="no-image d-flex align-items-center justify-content-center">
+                    <i class="bi bi-image text-secondary fs-2"></i>
+                  </div>
+                }
+              </div>
+              <div class="card-body p-2">
+                <p class="card-text text-white small mb-1 text-truncate fw-semibold">{{ item.DESCRIPCION_SAP }}</p>
+                <p class="card-text mb-1">
+                  <span class="badge bg-warning text-dark small">{{ item.MATERIAL }}</span>
+                </p>
+                <p class="card-text text-secondary small mb-0 text-truncate">
+                  <i class="bi bi-geo-alt me-1"></i>{{ item.UBICACION || 'Sin ubicación' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
     @if (buscando) {
       <div class="text-center py-5">
         <div class="spinner-border text-warning" role="status">
@@ -148,7 +142,6 @@
       </div>
     }
 
-    <!-- Error Message -->
     @if (mensajeError) {
       <div class="alert alert-danger mt-3 d-flex align-items-center gap-2" role="alert">
         <i class="bi bi-exclamation-triangle-fill"></i>
@@ -156,7 +149,6 @@
       </div>
     }
 
-    <!-- Modal Hijo -->
     @if (repuestoSeleccionado) {
       <app-repuesto-detalle
         [repuesto]="repuestoSeleccionado"
