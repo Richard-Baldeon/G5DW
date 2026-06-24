@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { CatalogoService } from '../../core/services/catalogo.service';
@@ -22,30 +22,36 @@ export class CatalogoBusqueda {
   buscando = false;
   mensajeError = '';
 
-  constructor(private catalogoService: CatalogoService) {}
+  // Inyectamos ChangeDetectorRef en el constructor de manera privada
+  constructor(
+    private catalogoService: CatalogoService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-buscarPorCodigo(): void {
+  buscarPorCodigo(): void {
     const codigo = this.codigoSAP.trim();
     if (!codigo) return;
 
     this.buscando = true;
     this.mensajeError = '';
-    this.resultados = []; // Limpiamos búsquedas previas
+    this.resultados = []; 
     this.repuestoSeleccionado = null;
 
     this.catalogoService.buscarPorCodigo(codigo).subscribe({
       next: (repuesto) => {
         this.buscando = false;
         if (repuesto) {
-          // Guardamos el repuesto en el arreglo para que pinte la tarjeta en el HTML
           this.resultados = [repuesto]; 
         } else {
           this.mensajeError = `¡El Código SAP "${codigo}" no fue encontrado!`;
         }
+        // Le avisamos a la vista que renderice de inmediato
+        this.cdr.detectChanges();
       },
       error: () => {
         this.buscando = false;
         this.mensajeError = 'Error al consultar el catálogo.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -65,10 +71,13 @@ buscarPorCodigo(): void {
         if (resultados.length === 0) {
           this.mensajeError = `No se encontraron resultados para "${termino}".`;
         }
+        // Le avisamos a la vista que renderice de inmediato
+        this.cdr.detectChanges();
       },
       error: () => {
         this.buscando = false;
         this.mensajeError = 'Error al consultar el catálogo.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -83,13 +92,16 @@ buscarPorCodigo(): void {
 
   limpiarCodigo(): void {
     this.codigoSAP = '';
+    this.resultados = []; // Limpiamos la grilla también al limpiar el código
     this.repuestoSeleccionado = null;
     this.mensajeError = '';
+    this.cdr.detectChanges();
   }
 
   limpiarDescripcion(): void {
     this.terminoDescripcion = '';
     this.resultados = [];
     this.mensajeError = '';
+    this.cdr.detectChanges();
   }
 }
