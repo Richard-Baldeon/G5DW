@@ -24,19 +24,21 @@ export class CatalogoBusqueda {
 
   constructor(private catalogoService: CatalogoService) {}
 
-  buscarPorCodigo(): void {
+buscarPorCodigo(): void {
     const codigo = this.codigoSAP.trim();
     if (!codigo) return;
 
     this.buscando = true;
     this.mensajeError = '';
+    this.resultados = []; // Limpiamos búsquedas previas
     this.repuestoSeleccionado = null;
 
     this.catalogoService.buscarPorCodigo(codigo).subscribe({
       next: (repuesto) => {
         this.buscando = false;
         if (repuesto) {
-          this.repuestoSeleccionado = repuesto;
+          // Guardamos el repuesto en el arreglo para que pinte la tarjeta en el HTML
+          this.resultados = [repuesto]; 
         } else {
           this.mensajeError = `¡El Código SAP "${codigo}" no fue encontrado!`;
         }

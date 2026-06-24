@@ -7,7 +7,7 @@ import { Repuesto } from '../models/repuesto.model';
   providedIn: 'root'
 })
 export class CatalogoService {
-  private readonly dataUrl = 'assets/data/repuestos.json';
+  private readonly dataUrl = 'data/repuestos.json';
 
   constructor(private http: HttpClient) {}
 

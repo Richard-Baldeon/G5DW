@@ -10,5 +10,5 @@ export interface Repuesto {
   NP_FABRICANTE: string;
   MEDIDAS: string;
   ENLACE_IMAGEN: string;
-  TIENE_FOTO: boolean;
+  TIENE_FOTO?: boolean;
 }
