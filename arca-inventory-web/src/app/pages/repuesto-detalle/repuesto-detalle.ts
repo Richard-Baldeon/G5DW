@@ -23,4 +23,15 @@ export class RepuestoDetalle {
     this.copiadoField = campo;
     setTimeout(() => this.copiadoField = null, 1500);
   }
+  transformarEnlaceDrive(url: string): string {
+    if (!url || url === '-') return '';
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/(?:id=|\/d\/|id\s*:\s*)([\w-]+)/);
+      if (match && match[1]) {
+        // En el modal usamos un ancho un poco mayor (w600) para que tenga mejor resolución
+        return `https://lh3.googleusercontent.com/d/${match[1]}=w600`;
+      }
+    }
+    return url;
+  }
 }
