@@ -12,12 +12,13 @@
       <div class="row g-3">
 
         <div class="col-12 col-md-5 text-center">
-          @if (repuesto?.ENLACE_IMAGEN) {
+          @if (repuesto?.ENLACE_IMAGEN && repuesto?.ENLACE_IMAGEN !== '-') {
             <img
-              [src]="repuesto?.ENLACE_IMAGEN"
+              [src]="transformarEnlaceDrive(repuesto!.ENLACE_IMAGEN)"
               [alt]="repuesto?.DESCRIPCION_SAP"
               class="img-fluid rounded border border-secondary"
               style="max-height: 300px; object-fit: contain; background: #1a1a1a;"
+              referrerpolicy="no-referrer"
             />
           } @else {
             <div class="not-found-img d-flex align-items-center justify-content-center rounded border border-secondary">
