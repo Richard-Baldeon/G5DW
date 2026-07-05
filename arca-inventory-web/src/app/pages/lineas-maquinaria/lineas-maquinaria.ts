@@ -23,7 +23,7 @@ interface Linea {
 export class LineasMaquinaria {
   lineas: Linea[] = [
     {
-      nombre: 'Sidel', icono: 'bi-gear-wide-connected',
+      nombre: 'Llenadora_Sidel', icono: 'bi-gear-wide-connected',
       componentes: [
         { nombre: 'Alineador', filtro: 'alineador' },
         { nombre: 'Bomba', filtro: 'bomba' },
@@ -33,7 +33,7 @@ export class LineasMaquinaria {
       ]
     },
     {
-      nombre: 'Krones', icono: 'bi-cpu',
+      nombre: 'Llenadora_Krones', icono: 'bi-cpu',
       componentes: [
         { nombre: 'Válvulas', filtro: 'valvula' },
         { nombre: 'Rodamientos', filtro: 'rodamiento' },
@@ -43,7 +43,7 @@ export class LineasMaquinaria {
       ]
     },
     {
-      nombre: 'KHS', icono: 'bi-motherboard',
+      nombre: 'Etiquetadora_Sidel', icono: 'bi-motherboard',
       componentes: [
         { nombre: 'Bomba', filtro: 'bomba' },
         { nombre: 'Filtros', filtro: 'filtro' },
@@ -53,7 +53,7 @@ export class LineasMaquinaria {
       ]
     },
     {
-      nombre: 'Lanfranchi', icono: 'bi-box-seam',
+      nombre: 'Etiquetadora_Krones', icono: 'bi-box-seam',
       componentes: [
         { nombre: 'Cadenas', filtro: 'cadena' },
         { nombre: 'Guías', filtro: 'guia' },
@@ -62,7 +62,7 @@ export class LineasMaquinaria {
       ]
     },
     {
-      nombre: 'Dimac', icono: 'bi-tools',
+      nombre: 'Paletizadora_Sidel', icono: 'bi-tools',
       componentes: [
         { nombre: 'Cuchillas', filtro: 'cuchilla' },
         { nombre: 'Rodamientos', filtro: 'rodamiento' },
@@ -70,20 +70,11 @@ export class LineasMaquinaria {
       ]
     },
     {
-      nombre: 'Robopac', icono: 'bi-robot',
+      nombre: 'Paletizadora_Krones', icono: 'bi-robot',
       componentes: [
         { nombre: 'Motores', filtro: 'motor' },
         { nombre: 'Cilindros', filtro: 'cilindro' },
         { nombre: 'Sensores', filtro: 'sensor' },
-      ]
-    },
-    {
-      nombre: 'SMI', icono: 'bi-wrench-adjustable',
-      componentes: [
-        { nombre: 'Correas', filtro: 'correa' },
-        { nombre: 'Válvulas', filtro: 'valvula' },
-        { nombre: 'Sensores', filtro: 'sensor' },
-        { nombre: 'Bomba', filtro: 'bomba' },
       ]
     },
   ];
