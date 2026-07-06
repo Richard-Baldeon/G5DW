@@ -27,6 +27,7 @@ export class CatalogoBusqueda {
     private cdr: ChangeDetectorRef
   ) {}
 
+  // 1. BÚSQUEDA POR CÓDIGO SAP
   buscarPorCodigo(): void {
     const codigo = this.codigoSAP.trim();
     if (!codigo) return;
@@ -39,8 +40,9 @@ export class CatalogoBusqueda {
     this.catalogoService.buscarPorCodigo(codigo).subscribe({
       next: (repuesto) => {
         if (repuesto) {
-          // Buscamos su imagen en S3 inmediatamente antes de mostrarlo
-          this.cargarImagenS3YAgregarALista(repuesto);
+          this.resultados = [repuesto];
+          // Tu Lambda ya resuelve las mayúsculas/minúsculas de S3 directamente
+          this.cargarImagenS3(repuesto);
         } else {
           this.buscando = false;
           this.mensajeError = `¡El Código SAP "${codigo}" no fue encontrado!`;
@@ -55,6 +57,7 @@ export class CatalogoBusqueda {
     });
   }
 
+  // 2. BÚSQUEDA POR DESCRIPCIÓN (TEXTO MULTIPLE)
   buscarPorDescripcion(): void {
     const termino = this.terminoDescripcion.trim();
     if (!termino) return;
@@ -65,19 +68,19 @@ export class CatalogoBusqueda {
 
     this.catalogoService.buscarPorDescripcion(termino).subscribe({
       next: (listaRepuestos) => {
+        this.buscando = false;
         if (listaRepuestos.length === 0) {
-          this.buscando = false;
           this.mensajeError = `No se encontraron resultados para "${termino}".`;
           this.cdr.detectChanges();
           return;
         }
 
-        // Para las descripciones, guardamos la lista e intentamos resolver 
-        // las imágenes bajo demanda cuando el usuario abra el detalle, 
-        // o las cargamos aquí si son pocos resultados.
         this.resultados = listaRepuestos;
-        this.buscando = false;
         this.cdr.detectChanges();
+
+        // AQUÍ ESTÁ EL TRUCO: Disparamos la carga de S3 para cada repuesto en paralelo.
+        // Cada tarjeta se actualizará individualmente conforme AWS responda.
+        this.resultados.forEach(repuesto => this.cargarImagenS3(repuesto));
       },
       error: () => {
         this.buscando = false;
@@ -87,78 +90,29 @@ export class CatalogoBusqueda {
     });
   }
 
-  // Método intermedio para buscar la imagen (.JPG o .jpg) en S3
-  private cargarImagenS3YAgregarALista(repuesto: Repuesto): void {
-    const codigoBase = repuesto.MATERIAL.trim();
-
-    // Intento 1: .JPG
-    this.catalogoService.storage_img(`${codigoBase}.JPG`).subscribe({
-      next: (res) => {
-        this.buscando = false;
-        if (res && res.body && res.body.url) {
-          repuesto.ENLACE_IMAGEN = res.body.url;
-        } else {
-          // Intento 2: .jpg (minúscula) si el primero no devolvió URL
-          this.resolverMinuscula(repuesto, codigoBase);
-          return;
-        }
-        this.resultados = [repuesto];
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        // Intento 2: .jpg si el primero falló por red/404
-        this.resolverMinuscula(repuesto, codigoBase);
-      }
-    });
-  }
-
-  private resolverMinuscula(repuesto: Repuesto, codigoBase: string): void {
-    this.catalogoService.storage_img(`${codigoBase}.jpg`).subscribe({
-      next: (res) => {
-        this.buscando = false;
-        if (res && res.body && res.body.url) {
-          repuesto.ENLACE_IMAGEN = res.body.url;
-        } else {
-          repuesto.ENLACE_IMAGEN = ''; // Sin imagen si ambos fallan
-        }
-        this.resultados = [repuesto];
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.buscando = false;
-        repuesto.ENLACE_IMAGEN = ''; 
-        this.resultados = [repuesto];
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  // Al seleccionar, si es búsqueda por descripción, cargamos su S3 en ese instante
-  seleccionarRepuesto(repuesto: Repuesto): void {
-    // Si ya tiene la URL de S3 (porque se buscó por código), lo abrimos directo
-    if (repuesto.ENLACE_IMAGEN && repuesto.ENLACE_IMAGEN.includes('amazonaws.com')) {
-      this.repuestoSeleccionado = repuesto;
-      return;
-    }
-
-    this.buscando = true;
-    const codigoBase = repuesto.MATERIAL.trim();
-
-    // En tu archivo catalogo-busqueda.ts ahora el flujo es directo y limpio:
+  // MÉTODO UNIFICADO: Carga la imagen desde S3 usando tu Lambda optimizada
+  private cargarImagenS3(repuesto: Repuesto): void {
     this.catalogoService.storage_img(repuesto.MATERIAL).subscribe({
       next: (res) => {
-        this.buscando = false;
         if (res && res.body && res.body.url) {
           repuesto.ENLACE_IMAGEN = res.body.url;
+          // Forzamos el renderizado de la tarjeta que acaba de recibir su link de S3
+          this.cdr.detectChanges();
         }
-        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.buscando = false;
-        console.error("Error al traer la imagen de S3", err);
+        console.error(`No se pudo cargar la imagen para ${repuesto.MATERIAL}`, err);
+        repuesto.ENLACE_IMAGEN = ''; // Asegura que muestre el icono por defecto en la grilla
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // 3. SELECCIONAR REPUESTO (ABRIR DETALLE)
+  seleccionarRepuesto(repuesto: Repuesto): void {
+    // Como las imágenes se cargan en la grilla inmediatamente, 
+    // cuando abres el detalle ya tiene la URL firmada lista.
+    this.repuestoSeleccionado = repuesto;
   }
 
   cerrarModal(): void {
