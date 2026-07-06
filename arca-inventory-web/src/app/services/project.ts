@@ -30,5 +30,11 @@ export class Project {
       {responseType: 'json'}
     );
   }
+  repuestos_maquina(param1: String, param2: String){
+    return this.http.get(
+      'https://h6120959l8.execute-api.us-east-1.amazonaws.com/v1/getrepuestosmaq?maquina=' + param1 + 'elemento=' +param2,
+      {responseType: 'json'}
+    )
+  }
 
 }
