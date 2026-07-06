@@ -80,8 +80,10 @@
               <div class="col-12 col-sm-6 col-xl-4">
                 <div class="card bg-dark border-secondary result-card h-100" (click)="seleccionarRepuesto(item)" role="button">
                   <div class="card-img-top-wrapper">
-                    @if (item.ENLACE_IMAGEN) {
-                      <img [src]="item.ENLACE_IMAGEN" [alt]="item.DESCRIPCION_SAP" class="card-img-top" />
+                    @if (item.ENLACE_IMAGEN && item.ENLACE_IMAGEN !== '-') {
+                      <img [src]="transformarEnlaceDrive(item.ENLACE_IMAGEN)" 
+                      [alt]="item.DESCRIPCION_SAP" class="card-img-top" 
+                      referrerpolicy="no-referrer"/>
                     } @else {
                       <div class="no-image d-flex align-items-center justify-content-center">
                         <i class="bi bi-image text-secondary fs-2"></i>
