@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { CatalogoService } from '../../core/services/catalogo.service';
+import { Component, ChangeDetectorRef, NgZone } from '@angular/core';
 import { Repuesto } from '../../core/models/repuesto.model';
 import { RepuestoDetalle } from '../repuesto-detalle/repuesto-detalle';
+import { Project } from '../../services/project';
 
 interface Componente {
   nombre: string;
@@ -22,61 +22,12 @@ interface Linea {
 })
 export class LineasMaquinaria {
   lineas: Linea[] = [
-    {
-      nombre: 'Llenadora_Sidel', icono: 'bi-gear-wide-connected',
-      componentes: [
-        { nombre: 'Alineador', filtro: 'alineador' },
-        { nombre: 'Bomba', filtro: 'bomba' },
-        { nombre: 'Sensores', filtro: 'sensor' },
-        { nombre: 'Servomotores', filtro: 'servo' },
-        { nombre: 'Borneras', filtro: 'bornera' },
-      ]
-    },
-    {
-      nombre: 'Llenadora_Krones', icono: 'bi-cpu',
-      componentes: [
-        { nombre: 'Válvulas', filtro: 'valvula' },
-        { nombre: 'Rodamientos', filtro: 'rodamiento' },
-        { nombre: 'Sensores', filtro: 'sensor' },
-        { nombre: 'Cilindros', filtro: 'cilindro' },
-        { nombre: 'Correas', filtro: 'correa' },
-      ]
-    },
-    {
-      nombre: 'Etiquetadora_Sidel', icono: 'bi-motherboard',
-      componentes: [
-        { nombre: 'Bomba', filtro: 'bomba' },
-        { nombre: 'Filtros', filtro: 'filtro' },
-        { nombre: 'Engranajes', filtro: 'engranaje' },
-        { nombre: 'Motores', filtro: 'motor' },
-        { nombre: 'Sensores', filtro: 'sensor' },
-      ]
-    },
-    {
-      nombre: 'Etiquetadora_Krones', icono: 'bi-box-seam',
-      componentes: [
-        { nombre: 'Cadenas', filtro: 'cadena' },
-        { nombre: 'Guías', filtro: 'guia' },
-        { nombre: 'Servomotores', filtro: 'servo' },
-        { nombre: 'Borneras', filtro: 'bornera' },
-      ]
-    },
-    {
-      nombre: 'Paletizadora_Sidel', icono: 'bi-tools',
-      componentes: [
-        { nombre: 'Cuchillas', filtro: 'cuchilla' },
-        { nombre: 'Rodamientos', filtro: 'rodamiento' },
-        { nombre: 'Sensores', filtro: 'sensor' },
-      ]
-    },
-    {
-      nombre: 'Paletizadora_Krones', icono: 'bi-robot',
-      componentes: [
-        { nombre: 'Motores', filtro: 'motor' },
-        { nombre: 'Cilindros', filtro: 'cilindro' },
-        { nombre: 'Sensores', filtro: 'sensor' },
-      ]
-    },
+    { nombre: 'Llenadora_Sidel', icono: 'bi-gear-wide-connected', componentes: [] },
+    { nombre: 'Llenadora_Krones', icono: 'bi-cpu', componentes: [] },
+    { nombre: 'Etiquetadora_Sidel', icono: 'bi-motherboard', componentes: [] },
+    { nombre: 'Etiquetadora_Krones', icono: 'bi-box-seam', componentes: [] },
+    { nombre: 'Paletizadora_Sidel', icono: 'bi-tools', componentes: [] },
+    { nombre: 'Paletizadora_Krones', icono: 'bi-robot', componentes: [] },
   ];
 
   lineaAbierta: string | null = null;
@@ -85,32 +36,64 @@ export class LineasMaquinaria {
   cargando = false;
   repuestoSeleccionado: Repuesto | null = null;
 
-  constructor(private catalogoService: CatalogoService) {}
+  // Inyectamos NgZone además de ChangeDetectorRef
+  constructor(
+    private projectService: Project,
+    private cdr: ChangeDetectorRef,
+    private zone: NgZone
+  ) {}
 
   toggleLinea(nombre: string): void {
     if (this.lineaAbierta === nombre) {
       this.lineaAbierta = null;
       this.componenteActivo = null;
       this.resultados = [];
-    } else {
-      this.lineaAbierta = nombre;
-      this.componenteActivo = null;
-      this.resultados = [];
+      return;
     }
+
+    this.lineaAbierta = nombre;
+    this.componenteActivo = null;
+    this.resultados = [];
+    this.cargando = true;
+
+    const nombreParaApi = nombre.toLowerCase();
+
+    this.projectService.elementos_maquina(nombreParaApi).subscribe({
+      next: (res: any) => {
+        // OBLIGAMOS a Angular a ejecutar esto dentro de su ciclo de vida activo
+        this.zone.run(() => {
+          if (res && res.data) {
+            this.lineas = this.lineas.map(l => {
+              if (l.nombre === nombre) {
+                return {
+                  ...l,
+                  componentes: res.data.map((item: any) => ({
+                    nombre: item.elemento,
+                    filtro: item.elemento.toLowerCase()
+                  }))
+                };
+              }
+              return l;
+            });
+          }
+          this.cargando = false;
+          
+          // Forzamos el renderizado inmediato
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => {
+        console.error('Error al traer elementos de AWS:', err);
+        this.zone.run(() => {
+          this.cargando = false;
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   seleccionarComponente(linea: string, comp: Componente): void {
     this.componenteActivo = `${linea}-${comp.nombre}`;
-    this.cargando = true;
-    this.resultados = [];
-
-    this.catalogoService.buscarPorDescripcion(`*${comp.filtro}*`).subscribe({
-      next: (items) => {
-        this.resultados = items.slice(0, 50);
-        this.cargando = false;
-      },
-      error: () => this.cargando = false
-    });
   }
 
   seleccionarRepuesto(repuesto: Repuesto): void {
