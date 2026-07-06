@@ -39,12 +39,16 @@ export class CatalogoBusqueda {
 
     this.catalogoService.buscarPorCodigo(codigo).subscribe({
       next: (repuesto) => {
+        // APAGAMOS EL SPINNER AQUÍ: Ya encontró el resultado en el catálogo principal
+        this.buscando = false;
+
         if (repuesto) {
           this.resultados = [repuesto];
-          // Tu Lambda ya resuelve las mayúsculas/minúsculas de S3 directamente
+          this.cdr.detectChanges();
+
+          // Disparar la carga de la imagen en S3 tras bambalinas
           this.cargarImagenS3(repuesto);
         } else {
-          this.buscando = false;
           this.mensajeError = `¡El Código SAP "${codigo}" no fue encontrado!`;
           this.cdr.detectChanges();
         }
@@ -96,13 +100,12 @@ export class CatalogoBusqueda {
       next: (res) => {
         if (res && res.body && res.body.url) {
           repuesto.ENLACE_IMAGEN = res.body.url;
-          // Forzamos el renderizado de la tarjeta que acaba de recibir su link de S3
-          this.cdr.detectChanges();
+          this.cdr.detectChanges(); // Renderiza la imagen en la tarjeta cuando S3 responda
         }
       },
       error: (err) => {
         console.error(`No se pudo cargar la imagen para ${repuesto.MATERIAL}`, err);
-        repuesto.ENLACE_IMAGEN = ''; // Asegura que muestre el icono por defecto en la grilla
+        repuesto.ENLACE_IMAGEN = ''; 
         this.cdr.detectChanges();
       }
     });
