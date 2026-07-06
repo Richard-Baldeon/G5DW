@@ -1,6 +1,7 @@
 <div class="min-vh-100 bg-very-dark py-4 px-3">
   <div class="container-xl">
 
+    <!-- Header -->
     <div class="mb-4">
       <h1 class="text-warning fw-bold mb-1">Líneas de Producción PET</h1>
       <p class="text-secondary mb-0">Selecciona una línea y un componente para ver sus repuestos</p>
@@ -43,7 +44,7 @@
                       </li>
                     } @empty {
                       <li class="list-group-item bg-dark text-secondary small border-secondary text-center py-3">
-                        @if (cargando) {
+                        @if (cargando && !componenteActivo) {
                           <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
                           Cargando elementos de AWS...
                         } @else {
@@ -115,6 +116,7 @@
 
     </div>
 
+    <!-- Modal Detalle -->
     @if (repuestoSeleccionado) {
       <app-repuesto-detalle
         [repuesto]="repuestoSeleccionado"
