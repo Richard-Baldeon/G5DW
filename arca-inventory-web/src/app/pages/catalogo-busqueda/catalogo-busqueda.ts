@@ -22,7 +22,6 @@ export class CatalogoBusqueda {
   buscando = false;
   mensajeError = '';
 
-  // Inyectamos ChangeDetectorRef en el constructor de manera privada
   constructor(
     private catalogoService: CatalogoService,
     private cdr: ChangeDetectorRef
@@ -39,14 +38,14 @@ export class CatalogoBusqueda {
 
     this.catalogoService.buscarPorCodigo(codigo).subscribe({
       next: (repuesto) => {
-        this.buscando = false;
         if (repuesto) {
-          this.resultados = [repuesto]; 
+          // Buscamos su imagen en S3 inmediatamente antes de mostrarlo
+          this.cargarImagenS3YAgregarALista(repuesto);
         } else {
+          this.buscando = false;
           this.mensajeError = `¡El Código SAP "${codigo}" no fue encontrado!`;
+          this.cdr.detectChanges();
         }
-        // Le avisamos a la vista que renderice de inmediato
-        this.cdr.detectChanges();
       },
       error: () => {
         this.buscando = false;
@@ -65,13 +64,19 @@ export class CatalogoBusqueda {
     this.resultados = [];
 
     this.catalogoService.buscarPorDescripcion(termino).subscribe({
-      next: (resultados) => {
-        this.buscando = false;
-        this.resultados = resultados;
-        if (resultados.length === 0) {
+      next: (listaRepuestos) => {
+        if (listaRepuestos.length === 0) {
+          this.buscando = false;
           this.mensajeError = `No se encontraron resultados para "${termino}".`;
+          this.cdr.detectChanges();
+          return;
         }
-        // Le avisamos a la vista que renderice de inmediato
+
+        // Para las descripciones, guardamos la lista e intentamos resolver 
+        // las imágenes bajo demanda cuando el usuario abra el detalle, 
+        // o las cargamos aquí si son pocos resultados.
+        this.resultados = listaRepuestos;
+        this.buscando = false;
         this.cdr.detectChanges();
       },
       error: () => {
@@ -82,8 +87,96 @@ export class CatalogoBusqueda {
     });
   }
 
+  // Método intermedio para buscar la imagen (.JPG o .jpg) en S3
+  private cargarImagenS3YAgregarALista(repuesto: Repuesto): void {
+    const codigoBase = repuesto.MATERIAL.trim();
+
+    // Intento 1: .JPG
+    this.catalogoService.storage_img(`${codigoBase}.JPG`).subscribe({
+      next: (res) => {
+        this.buscando = false;
+        if (res && res.body && res.body.url) {
+          repuesto.ENLACE_IMAGEN = res.body.url;
+        } else {
+          // Intento 2: .jpg (minúscula) si el primero no devolvió URL
+          this.resolverMinuscula(repuesto, codigoBase);
+          return;
+        }
+        this.resultados = [repuesto];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Intento 2: .jpg si el primero falló por red/404
+        this.resolverMinuscula(repuesto, codigoBase);
+      }
+    });
+  }
+
+  private resolverMinuscula(repuesto: Repuesto, codigoBase: string): void {
+    this.catalogoService.storage_img(`${codigoBase}.jpg`).subscribe({
+      next: (res) => {
+        this.buscando = false;
+        if (res && res.body && res.body.url) {
+          repuesto.ENLACE_IMAGEN = res.body.url;
+        } else {
+          repuesto.ENLACE_IMAGEN = ''; // Sin imagen si ambos fallan
+        }
+        this.resultados = [repuesto];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.buscando = false;
+        repuesto.ENLACE_IMAGEN = ''; 
+        this.resultados = [repuesto];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Al seleccionar, si es búsqueda por descripción, cargamos su S3 en ese instante
   seleccionarRepuesto(repuesto: Repuesto): void {
-    this.repuestoSeleccionado = repuesto;
+    // Si ya tiene la URL de S3 (porque se buscó por código), lo abrimos directo
+    if (repuesto.ENLACE_IMAGEN && repuesto.ENLACE_IMAGEN.includes('amazonaws.com')) {
+      this.repuestoSeleccionado = repuesto;
+      return;
+    }
+
+    this.buscando = true;
+    const codigoBase = repuesto.MATERIAL.trim();
+
+    this.catalogoService.storage_img(`${codigoBase}.JPG`).subscribe({
+      next: (res) => {
+        this.buscando = false;
+        if (res && res.body && res.body.url) {
+          this.repuestoSeleccionado = { ...repuesto, ENLACE_IMAGEN: res.body.url };
+        } else {
+          this.seleccionarConMinuscula(repuesto, codigoBase);
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.seleccionarConMinuscula(repuesto, codigoBase);
+      }
+    });
+  }
+
+  private seleccionarConMinuscula(repuesto: Repuesto, codigoBase: string): void {
+    this.catalogoService.storage_img(`${codigoBase}.jpg`).subscribe({
+      next: (res) => {
+        this.buscando = false;
+        if (res && res.body && res.body.url) {
+          this.repuestoSeleccionado = { ...repuesto, ENLACE_IMAGEN: res.body.url };
+        } else {
+          this.repuestoSeleccionado = repuesto;
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.buscando = false;
+        this.repuestoSeleccionado = repuesto;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   cerrarModal(): void {
@@ -92,7 +185,7 @@ export class CatalogoBusqueda {
 
   limpiarCodigo(): void {
     this.codigoSAP = '';
-    this.resultados = []; // Limpiamos la grilla también al limpiar el código
+    this.resultados = [];
     this.repuestoSeleccionado = null;
     this.mensajeError = '';
     this.cdr.detectChanges();
@@ -103,17 +196,5 @@ export class CatalogoBusqueda {
     this.resultados = [];
     this.mensajeError = '';
     this.cdr.detectChanges();
-  }
-  transformarEnlaceDrive(url: string): string {
-    if (!url || url === '-') return '';
-    // Si el enlace contiene la estructura clásica de previsualización de Drive, extraemos el ID
-    if (url.includes('drive.google.com')) {
-      const match = url.match(/(?:id=|\/d\/|id\s*:\s*)([\w-]+)/);
-      if (match && match[1]) {
-        // Formato de renderizado alternativo optimizado para saltar restricciones
-        return `https://lh3.googleusercontent.com/d/${match[1]}=w400`;
-      }
-    }
-    return url;
   }
 }
