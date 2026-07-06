@@ -59,4 +59,13 @@ export class CatalogoService {
       map(repuesto => repuesto !== undefined)
     );
   }
+  // Agrega este método dentro de tu clase CatalogoService
+
+storage_img(param: string): Observable<any> {
+  const codigoLimpio = param.trim();
+  return this.http.get<any>(
+    `${this.baseUrl}/getstorage?imagen=${codigoLimpio}`,
+    { responseType: 'json' }
+  );
+}
 }
