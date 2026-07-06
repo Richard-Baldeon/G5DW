@@ -1,7 +1,6 @@
 <div class="min-vh-100 bg-very-dark py-4 px-3">
   <div class="container-xl">
 
-    <!-- Header -->
     <div class="mb-4">
       <h1 class="text-warning fw-bold mb-1">Líneas de Producción PET</h1>
       <p class="text-secondary mb-0">Selecciona una línea y un componente para ver sus repuestos</p>
@@ -12,7 +11,7 @@
       <!-- Accordion Column -->
       <div class="col-12 col-lg-4">
         <div class="accordion" id="accordionLineas">
-          @for (linea of lineas; track linea.nombre; let i = $index) {
+          @for (linea of lineas; track linea.nombre) {
             <div class="accordion-item bg-dark border-secondary">
               <h2 class="accordion-header">
                 <button
@@ -23,9 +22,12 @@
                 >
                   <i class="bi {{ linea.icono }} me-2 text-warning"></i>
                   {{ linea.nombre }}
-                  <span class="badge bg-warning text-dark ms-auto me-2 small">{{ linea.componentes.length }}</span>
+                  <span class="badge bg-warning text-dark ms-auto me-2 small">
+                    {{ linea.componentes.length }}
+                  </span>
                 </button>
               </h2>
+
               @if (lineaAbierta === linea.nombre) {
                 <div class="accordion-body p-0">
                   <ul class="list-group list-group-flush">
@@ -39,6 +41,15 @@
                         <i class="bi bi-chevron-right me-2 small text-warning"></i>
                         {{ comp.nombre }}
                       </li>
+                    } @empty {
+                      <li class="list-group-item bg-dark text-secondary small border-secondary text-center py-3">
+                        @if (cargando) {
+                          <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
+                          Cargando elementos de AWS...
+                        } @else {
+                          No hay elementos registrados para esta máquina.
+                        }
+                      </li>
                     }
                   </ul>
                 </div>
@@ -50,7 +61,7 @@
 
       <!-- Results Column -->
       <div class="col-12 col-lg-8">
-        @if (cargando) {
+        @if (cargando && componenteActivo) {
           <div class="text-center py-5">
             <div class="spinner-border text-warning" role="status">
               <span class="visually-hidden">Cargando...</span>
@@ -104,7 +115,6 @@
 
     </div>
 
-    <!-- Modal Hijo -->
     @if (repuestoSeleccionado) {
       <app-repuesto-detalle
         [repuesto]="repuestoSeleccionado"
