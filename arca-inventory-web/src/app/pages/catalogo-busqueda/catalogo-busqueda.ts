@@ -144,36 +144,18 @@ export class CatalogoBusqueda {
     this.buscando = true;
     const codigoBase = repuesto.MATERIAL.trim();
 
-    this.catalogoService.storage_img(`${codigoBase}.JPG`).subscribe({
+    // En tu archivo catalogo-busqueda.ts ahora el flujo es directo y limpio:
+    this.catalogoService.storage_img(repuesto.MATERIAL).subscribe({
       next: (res) => {
         this.buscando = false;
         if (res && res.body && res.body.url) {
-          this.repuestoSeleccionado = { ...repuesto, ENLACE_IMAGEN: res.body.url };
-        } else {
-          this.seleccionarConMinuscula(repuesto, codigoBase);
+          repuesto.ENLACE_IMAGEN = res.body.url;
         }
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.seleccionarConMinuscula(repuesto, codigoBase);
-      }
-    });
-  }
-
-  private seleccionarConMinuscula(repuesto: Repuesto, codigoBase: string): void {
-    this.catalogoService.storage_img(`${codigoBase}.jpg`).subscribe({
-      next: (res) => {
+      error: (err) => {
         this.buscando = false;
-        if (res && res.body && res.body.url) {
-          this.repuestoSeleccionado = { ...repuesto, ENLACE_IMAGEN: res.body.url };
-        } else {
-          this.repuestoSeleccionado = repuesto;
-        }
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.buscando = false;
-        this.repuestoSeleccionado = repuesto;
+        console.error("Error al traer la imagen de S3", err);
         this.cdr.detectChanges();
       }
     });
