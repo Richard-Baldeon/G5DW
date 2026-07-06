@@ -7,7 +7,7 @@ import { Repuesto } from '../models/repuesto.model';
   providedIn: 'root'
 })
 export class CatalogoService {
-  private readonly dataUrl = 'assets/data/repuestos.json';
+  private readonly apiUrl = 'https://staging.d3v26duzwdz1ba.amplifyapp.com/home';
 
   constructor(private http: HttpClient) {}
 
