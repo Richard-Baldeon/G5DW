@@ -80,13 +80,18 @@
               <div class="col-12 col-sm-6 col-xl-4">
                 <div class="card bg-dark border-secondary result-card h-100" (click)="seleccionarRepuesto(item)" role="button">
                   <div class="card-img-top-wrapper">
-                    @if (item.ENLACE_IMAGEN && item.ENLACE_IMAGEN !== '-') {
-                      <img [src]="transformarEnlaceDrive(item.ENLACE_IMAGEN)" 
-                          [alt]="item.DESCRIPCION_BREVE" class="card-img-top" 
-                          referrerpolicy="no-referrer"/>
+                    @if (item.ENLACE_IMAGEN) {
+                      <img 
+                        [src]="item.ENLACE_IMAGEN" 
+                        [alt]="item.DESCRIPCION_BREVE" 
+                        class="card-img-top" 
+                        referrerpolicy="no-referrer"
+                      />
                     } @else {
-                      <div class="no-image d-flex align-items-center justify-content-center">
-                        <i class="bi bi-image text-secondary fs-2"></i>
+                      <!-- Spinner de carga individual por tarjeta mientras AWS le devuelve la URL firmada -->
+                      <div class="no-image d-flex flex-column align-items-center justify-content-center py-4">
+                        <div class="spinner-border spinner-border-sm text-warning mb-2" role="status"></div>
+                        <span class="text-secondary small" style="font-size: 0.75rem;">Verificando S3...</span>
                       </div>
                     }
                   </div>
