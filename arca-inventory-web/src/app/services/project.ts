@@ -36,4 +36,10 @@ export class Project {
       {responseType: 'json'}
     );
   }
+  storage_img(param: String){
+    return this.http.get(
+      'https://h6120959l8.execute-api.us-east-1.amazonaws.com/v1/getstorage?imagen=' + param,
+      {responseType: 'json'}
+    );
+  }
 }
