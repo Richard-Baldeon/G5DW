@@ -130,4 +130,16 @@ export class LineasMaquinaria {
   cerrarModal(): void {
     this.repuestoSeleccionado = null;
   }
+  transformarEnlaceDrive(url: string): string {
+  if (!url || url === '-') return '';
+  // Si el enlace contiene la estructura clásica de previsualización de Drive, extraemos el ID
+  if (url.includes('drive.google.com')) {
+    const match = url.match(/(?:id=|\/d\/|id\s*:\s*)([\w-]+)/);
+    if (match && match[1]) {
+      // Formato de renderizado alternativo optimizado para saltar restricciones
+      return `https://lh3.googleusercontent.com/d/${match[1]}=w400`;
+    }
+  }
+  return url;
+}
 }
