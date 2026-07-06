@@ -76,14 +76,14 @@
           </div>
 
           <div class="row g-3">
-            @for (item of resultados; track item.MATERIAL) {
+            @for (item of resultados; track item.CODIGO_SAP) {
               <div class="col-12 col-sm-6 col-xl-4">
                 <div class="card bg-dark border-secondary result-card h-100" (click)="seleccionarRepuesto(item)" role="button">
                   <div class="card-img-top-wrapper">
                     @if (item.ENLACE_IMAGEN && item.ENLACE_IMAGEN !== '-') {
                       <img [src]="transformarEnlaceDrive(item.ENLACE_IMAGEN)" 
-                      [alt]="item.DESCRIPCION_SAP" class="card-img-top" 
-                      referrerpolicy="no-referrer"/>
+                          [alt]="item.DESCRIPCION_BREVE" class="card-img-top" 
+                          referrerpolicy="no-referrer"/>
                     } @else {
                       <div class="no-image d-flex align-items-center justify-content-center">
                         <i class="bi bi-image text-secondary fs-2"></i>
@@ -91,12 +91,13 @@
                     }
                   </div>
                   <div class="card-body p-2">
-                    <p class="card-text text-white small mb-1 text-truncate fw-semibold">{{ item.DESCRIPCION_SAP }}</p>
+                    <!-- Ajustado a las nuevas llaves de la interfaz -->
+                    <p class="card-text text-white small mb-1 text-truncate fw-semibold">{{ item.DESCRIPCION_BREVE }}</p>
                     <p class="card-text mb-1">
-                      <span class="badge bg-warning text-dark small">{{ item.MATERIAL }}</span>
+                      <span class="badge bg-warning text-dark small">{{ item.CODIGO_SAP }}</span>
                     </p>
                     <p class="card-text text-secondary small mb-0 text-truncate">
-                      <i class="bi bi-geo-alt me-1"></i>{{ item.UBICACION || 'Sin ubicación' }}
+                      <i class="bi bi-geo-alt me-1"></i>{{ item.MARCA }}
                     </p>
                   </div>
                 </div>
@@ -118,13 +119,13 @@
 
     </div>
 
-    <!-- Modal Detalle -->
-    @if (repuestoSeleccionado) {
-      <app-repuesto-detalle
-        [repuesto]="repuestoSeleccionado"
-        (cerrar)="cerrarModal()"
-      ></app-repuesto-detalle>
-    }
+<!-- Modal Detalle -->
+@if (repuestoSeleccionado) {
+  <app-repuesto-detalle
+    [repuesto]="repuestoSeleccionado"
+    (cerrar)="cerrarModal()"
+  ></app-repuesto-detalle>
+}
 
   </div>
 </div>

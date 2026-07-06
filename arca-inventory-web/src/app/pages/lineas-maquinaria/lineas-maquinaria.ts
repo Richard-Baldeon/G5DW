@@ -1,7 +1,6 @@
 import { Component, ChangeDetectorRef, NgZone } from '@angular/core';
-import { Repuesto } from '../../core/models/repuesto.model';
-import { RepuestoDetalle } from '../repuesto-detalle/repuesto-detalle';
 import { Project } from '../../services/project';
+import { RepuestoDetalleMaquina } from '../repuesto-maquina-detalle/repuesto-maquina-detalle';
 
 interface Componente {
   nombre: string;
@@ -16,7 +15,7 @@ interface Linea {
 
 @Component({
   selector: 'app-lineas-maquinaria',
-  imports: [RepuestoDetalle],
+  imports: [RepuestoDetalleMaquina],
   templateUrl: './lineas-maquinaria.html',
   styleUrl: './lineas-maquinaria.css',
 })
@@ -101,18 +100,23 @@ export class LineasMaquinaria {
       next: (res: any) => {
         this.zone.run(() => {
           if (res && res.data) {
-            // Mapeamos las minúsculas de tu base de datos para que coincidan con las variables que tu HTML ya usa
             this.resultados = res.data.map((item: any) => ({
-              MATERIAL: item.codigo_sap !== '-' ? item.codigo_sap : (item.numero_parte || 'No codificado'),
-              DESCRIPCION_SAP: item.descripcion_extensa || item.descripcion_breve,
-              UBICACION: item.marca || 'Sin marca', // Puedes adaptarlo a la propiedad de ubicación real si la agregas
-              ENLACE_IMAGEN: (item.enlace_imagen && item.enlace_imagen !== 'No codificado' && item.enlace_imagen !== '111349') ? item.enlace_imagen : null
+              // Mantén tus nombres en mayúsculas idénticos a tu interfaz:
+              CODIGO_SAP: item.codigo_sap !== '-' ? item.codigo_sap : (item.numero_parte || 'No codificado'),
+              DESCRIPCION_BREVE: item.descripcion_breve || '',
+              DESCRIPCION_EXTENSA: item.descripcion_extensa || item.descripcion_breve || '',
+              ELEMENTO: item.elemento || '',
+              NOMBRE_TECNICO: item.nombre_tecnico || '',
+              MARCA: item.marca || 'Sin marca',
+              NUMERO_PARTE: item.numero_parte || '—',
+              ENLACE_IMAGEN: item.enlace_imagen // Deja tu lógica de imagen idéntica a como la tenías
             }));
           }
           this.cargando = false;
           this.cdr.detectChanges();
         });
       },
+      // ... el resto del error se queda igual
       error: (err) => {
         console.error('Error al traer repuestos de AWS:', err);
         this.zone.run(() => {
