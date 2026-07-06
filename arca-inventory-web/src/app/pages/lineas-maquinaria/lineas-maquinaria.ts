@@ -31,7 +31,7 @@ export class LineasMaquinaria {
 
   lineaAbierta: string | null = null;
   componenteActivo: string | null = null;
-  resultados: any[] = []; // Cambiado temporalmente a any[] para acoplar el mapeo de propiedades del nuevo JSON
+  resultados: any[] = []; 
   cargando = false;
   repuestoSeleccionado: any | null = null;
 
@@ -92,16 +92,15 @@ export class LineasMaquinaria {
     this.cargando = true;
     this.resultados = [];
 
-    // Formateamos los dos parámetros requeridos por tu API en minúsculas
     const maquinaApi = linea.toLowerCase();
     const elementoApi = comp.nombre.toLowerCase();
 
     this.projectService.repuestos_maquina(maquinaApi, elementoApi).subscribe({
       next: (res: any) => {
         this.zone.run(() => {
+          this.cargando = false;
           if (res && res.data) {
             this.resultados = res.data.map((item: any) => ({
-              // Mantén tus nombres en mayúsculas idénticos a tu interfaz:
               CODIGO_SAP: item.codigo_sap !== '-' ? item.codigo_sap : (item.numero_parte || 'No codificado'),
               DESCRIPCION_BREVE: item.descripcion_breve || '',
               DESCRIPCION_EXTENSA: item.descripcion_extensa || item.descripcion_breve || '',
@@ -109,20 +108,43 @@ export class LineasMaquinaria {
               NOMBRE_TECNICO: item.nombre_tecnico || '',
               MARCA: item.marca || 'Sin marca',
               NUMERO_PARTE: item.numero_parte || '—',
-              ENLACE_IMAGEN: item.enlace_imagen // Deja tu lógica de imagen idéntica a como la tenías
+              ENLACE_IMAGEN: '' // Inicializamos vacío para que cargue la de S3 de forma asíncrona
             }));
+
+            this.cdr.detectChanges();
+
+            // EJECUCIÓN EN PARALELO: Buscamos la foto en S3 para cada repuesto de la lista
+            this.resultados.forEach(repuesto => this.cargarImagenS3(repuesto));
+          } else {
+            this.cdr.detectChanges();
           }
-          this.cargando = false;
-          this.cdr.detectChanges();
         });
       },
-      // ... el resto del error se queda igual
       error: (err) => {
         console.error('Error al traer repuestos de AWS:', err);
         this.zone.run(() => {
           this.cargando = false;
           this.cdr.detectChanges();
         });
+      }
+    });
+  }
+
+  // Método privado para resolver de forma independiente la imagen de cada tarjeta en S3
+  private cargarImagenS3(repuesto: any): void {
+    // Si el repuesto no está codificado con código SAP, mandamos el NUMERO_PARTE a la Lambda
+    const parametroDeBusqueda = repuesto.CODIGO_SAP !== 'No codificado' ? repuesto.CODIGO_SAP : repuesto.NUMERO_PARTE;
+
+    this.projectService.storage_img(parametroDeBusqueda).subscribe({
+      next: (res: any) => {
+        if (res && res.body && res.body.url) {
+          repuesto.ENLACE_IMAGEN = res.body.url;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error(`Error de S3 para el material ${parametroDeBusqueda}:`, err);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -134,16 +156,4 @@ export class LineasMaquinaria {
   cerrarModal(): void {
     this.repuestoSeleccionado = null;
   }
-  transformarEnlaceDrive(url: string): string {
-  if (!url || url === '-') return '';
-  // Si el enlace contiene la estructura clásica de previsualización de Drive, extraemos el ID
-  if (url.includes('drive.google.com')) {
-    const match = url.match(/(?:id=|\/d\/|id\s*:\s*)([\w-]+)/);
-    if (match && match[1]) {
-      // Formato de renderizado alternativo optimizado para saltar restricciones
-      return `https://lh3.googleusercontent.com/d/${match[1]}=w400`;
-    }
-  }
-  return url;
-}
 }
