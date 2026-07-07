@@ -7,7 +7,7 @@ import { Repuesto } from '../models/repuesto.model';
   providedIn: 'root'
 })
 export class CatalogoService {
-  private readonly apiUrl = 'https://ltofrwe28.execute-api.us-east-1.amazonaws.com/prod/repuestos';  
+  private readonly apiUrl = 'https://ltyofrwe28.execute-api.us-east-1.amazonaws.com/prod/repuestos';  
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Repuesto[]> {
