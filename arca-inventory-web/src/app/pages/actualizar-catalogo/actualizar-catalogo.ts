@@ -1,74 +1,119 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { CatalogoService } from '../../core/services/catalogo.service';
+import { Repuesto } from '../../core/models/repuesto.model';
+import { RepuestoDetalle } from '../repuesto-detalle/repuesto-detalle';
 
 @Component({
-  selector: 'app-actualizar-catalogo',
-  imports: [FormsModule],
-  templateUrl: './actualizar-catalogo.html',
-  styleUrl: './actualizar-catalogo.css',
+  selector: 'app-catalogo-busqueda',
+  imports: [FormsModule, DecimalPipe, RepuestoDetalle],
+  templateUrl: './catalogo-busqueda.html',
+  styleUrl: './catalogo-busqueda.css',
 })
-export class ActualizarCatalogo {
+export class CatalogoBusqueda {
+  modoActivo: 'codigo' | 'descripcion' = 'codigo';
+
   codigoSAP = '';
-  archivoSeleccionado: File | null = null;
-  nombreArchivo = '';
-  mensaje: { tipo: 'success' | 'danger'; texto: string } | null = null;
-  procesando = false;
+  terminoDescripcion = '';
+
+  repuestoSeleccionado: Repuesto | null = null;
+  resultados: Repuesto[] = [];
+  buscando = false;
+  mensajeError = '';
 
   constructor(private catalogoService: CatalogoService) {}
 
-  onArchivoSeleccionado(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.archivoSeleccionado = input.files[0];
-      this.nombreArchivo = this.archivoSeleccionado.name;
+  cambiarModo(modo: 'codigo' | 'descripcion'): void {
+    this.modoActivo = modo;
+    this.mensajeError = '';
+    if (modo === 'descripcion' && !this.terminoDescripcion.trim()) {
+      this.cargarPorDefecto();
     }
   }
 
-  subirFotografia(): void {
-    this.mensaje = null;
-    const codigo = this.codigoSAP.trim();
-
-    if (!codigo) {
-      this.mensaje = { tipo: 'danger', texto: 'Ingresa un Código SAP.' };
-      return;
-    }
-    if (!this.archivoSeleccionado) {
-      this.mensaje = { tipo: 'danger', texto: 'Selecciona una fotografía.' };
-      return;
-    }
-
-    this.procesando = true;
-
-    this.catalogoService.existeCodigo(codigo).subscribe({
-      next: (existe) => {
-        this.procesando = false;
-        if (!existe) {
-          this.mensaje = {
-            tipo: 'danger',
-            texto: `¡El Código SAP "${codigo}" no existe!`
-          };
-        } else {
-          this.mensaje = {
-            tipo: 'success',
-            texto: `Fotografía "${this.nombreArchivo}" asociada exitosamente al repuesto ${codigo}.`
-          };
-          this.codigoSAP = '';
-          this.archivoSeleccionado = null;
-          this.nombreArchivo = '';
-        }
+  cargarPorDefecto(): void {
+    this.buscando = true;
+    this.mensajeError = '';
+    this.catalogoService.getAll().subscribe({
+      next: (todos) => {
+        this.buscando = false;
+        this.resultados = todos.slice(0, 12);
       },
       error: () => {
-        this.procesando = false;
-        this.mensaje = { tipo: 'danger', texto: 'Error al verificar el código.' };
+        this.buscando = false;
+        this.mensajeError = 'Error al cargar el catálogo.';
       }
     });
   }
 
-  cancelar(): void {
+  buscarPorCodigo(): void {
+    const codigo = this.codigoSAP.trim();
+    if (!codigo) return;
+
+    this.buscando = true;
+    this.mensajeError = '';
+    this.repuestoSeleccionado = null;
+
+    this.catalogoService.buscarPorCodigo(codigo).subscribe({
+      next: (repuesto) => {
+        this.buscando = false;
+        if (repuesto) {
+          this.repuestoSeleccionado = repuesto;
+        } else {
+          this.mensajeError = `¡El Código SAP "${codigo}" no fue encontrado!`;
+        }
+      },
+      error: () => {
+        this.buscando = false;
+        this.mensajeError = 'Error al consultar el catálogo.';
+      }
+    });
+  }
+
+  buscarPorDescripcion(): void {
+    const termino = this.terminoDescripcion.trim();
+    if (!termino) {
+      this.cargarPorDefecto();
+      return;
+    }
+
+    this.buscando = true;
+    this.mensajeError = '';
+    this.resultados = [];
+
+    this.catalogoService.buscarPorDescripcion(termino).subscribe({
+      next: (resultados) => {
+        this.buscando = false;
+        this.resultados = resultados;
+        if (resultados.length === 0) {
+          this.mensajeError = `No se encontraron resultados para "${termino}".`;
+        }
+      },
+      error: () => {
+        this.buscando = false;
+        this.mensajeError = 'Error al consultar el catálogo.';
+      }
+    });
+  }
+
+  seleccionarRepuesto(repuesto: Repuesto): void {
+    this.repuestoSeleccionado = repuesto;
+  }
+
+  cerrarModal(): void {
+    this.repuestoSeleccionado = null;
+  }
+
+  limpiarCodigo(): void {
     this.codigoSAP = '';
-    this.archivoSeleccionado = null;
-    this.nombreArchivo = '';
-    this.mensaje = null;
+    this.repuestoSeleccionado = null;
+    this.mensajeError = '';
+  }
+
+  limpiarDescripcion(): void {
+    this.terminoDescripcion = '';
+    this.mensajeError = '';
+    this.cargarPorDefecto();
   }
 }
