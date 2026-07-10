@@ -7,7 +7,7 @@ import { Repuesto } from '../models/repuesto.model';
   providedIn: 'root'
 })
 export class CatalogoService {
-  private readonly baseUrl = 'https://h6120959l8.execute-api.us-east-1.amazonaws.com/v1';
+  private readonly baseUrl = 'https://r8h3qrvwb1.execute-api.us-east-1.amazonaws.com/v1';
 
   constructor(private http: HttpClient) {}
 
@@ -15,16 +15,16 @@ export class CatalogoService {
   private mapearARepuesto(item: any): Repuesto {
     return {
       MATERIAL: item.material || '',
-      DESCRIPCION_SAP: item.descripcion_sap || '',
+      DESCRIPCION_SAP: item.descripcionSap || '',
       PRECIO: item.precio ? parseFloat(item.precio) : 0,
       UBICACION: item.ubicacion || '',
-      TEXTO_EXTENDIDO: item.texto_extendido || '',
-      PROVEEDOR_MAQUINA: item.proveedor_maquina || '',
-      NP_PROVEEDOR: item.np_proveedor || '',
-      FABRICANTE_COMPONENTE: item.fabricante_componente || '',
+      TEXTO_EXTENDIDO: item.textoExtendido || '',
+      PROVEEDOR_MAQUINA: item.proveedorMaquina || '',
+      NP_PROVEEDOR: item.npProveedor || '',
+      FABRICANTE_COMPONENTE: item.fabricanteComponente || '',
       NP_FABRICANTE: item.np_fabricante || '',
       MEDIDAS: item.medidas || '',
-      ENLACE_IMAGEN: item.enlace_imagen || '',
+      ENLACE_IMAGEN: item.enlaceImagen || '',
       TIENE_FOTO: item.tiene_foto ?? false
     };
   }
@@ -32,7 +32,7 @@ export class CatalogoService {
   // 1. Búsqueda por Código SAP
   buscarPorCodigo(codigo: string): Observable<Repuesto | undefined> {
     const codigoLimpio = codigo.trim();
-    return this.http.get<any>(`${this.baseUrl}/catalogosap?material=${codigoLimpio}`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/catalogo_sap?material=${codigoLimpio}`).pipe(
       map(res => {
         // Extraemos el arreglo de 'data' si viene envuelto
         const lista = res && res.data ? res.data : (Array.isArray(res) ? res : []);
@@ -44,7 +44,7 @@ export class CatalogoService {
   // 2. Búsqueda por Descripción
   buscarPorDescripcion(termino: string): Observable<Repuesto[]> {
     const terminoLimpio = termino.trim();
-    return this.http.get<any>(`${this.baseUrl}/catalogotexto?descripcion_sap=${terminoLimpio}`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/catalogo_txt?descripcionSap=${terminoLimpio}`).pipe(
       map(res => {
         // Extraemos el arreglo de 'data' si viene envuelto
         const lista = res && res.data ? res.data : (Array.isArray(res) ? res : []);
