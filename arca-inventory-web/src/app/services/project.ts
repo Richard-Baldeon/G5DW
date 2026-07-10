@@ -26,19 +26,19 @@ export class Project {
 
   elementos_maquina(param: String){
     return this.http.get(
-      'https://h6120959l8.execute-api.us-east-1.amazonaws.com/v1/getelementos?maquina=' + param,
+      'https://r8h3qrvwb1.execute-api.us-east-1.amazonaws.com/v1/getelementos?tabla=' + param,
       {responseType: 'json'}
     );
   }
   repuestos_maquina(param1: String, param2: String){
     return this.http.get(
-      'https://h6120959l8.execute-api.us-east-1.amazonaws.com/v1/getrepuestosmaq?maquina=' + param1 + '&elemento=' + param2,
+      'https://r8h3qrvwb1.execute-api.us-east-1.amazonaws.com/v1/getrepuestosmaq?tabla=' + param1 + '&elemento=' + param2,
       {responseType: 'json'}
     );
   }
   storage_img(param: String){
     return this.http.get(
-      'https://h6120959l8.execute-api.us-east-1.amazonaws.com/v1/getstorage?imagen=' + param,
+      'https://r8h3qrvwb1.execute-api.us-east-1.amazonaws.com/v1/getstorage?archivo=' + param,
       {responseType: 'json'}
     );
   }

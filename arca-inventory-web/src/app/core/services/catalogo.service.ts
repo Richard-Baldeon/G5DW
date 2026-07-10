@@ -64,7 +64,7 @@ export class CatalogoService {
 storage_img(param: string): Observable<any> {
   const codigoLimpio = param.trim();
   return this.http.get<any>(
-    `${this.baseUrl}/getstorage?imagen=${codigoLimpio}`,
+    `${this.baseUrl}/getstorage?archivo=${codigoLimpio}`,
     { responseType: 'json' }
   );
 }
