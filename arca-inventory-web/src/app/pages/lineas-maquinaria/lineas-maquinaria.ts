@@ -101,13 +101,13 @@ export class LineasMaquinaria {
           this.cargando = false;
           if (res && res.data) {
             this.resultados = res.data.map((item: any) => ({
-              CODIGO_SAP: item.codigo_sap !== '-' ? item.codigo_sap : (item.numero_parte || 'No codificado'),
-              DESCRIPCION_BREVE: item.descripcion_breve || '',
-              DESCRIPCION_EXTENSA: item.descripcion_extensa || item.descripcion_breve || '',
+              CODIGO_SAP: item.codigoSap !== '-' ? item.codigoSap : (item.numeroParte || 'No codificado'),
+              DESCRIPCION_BREVE: item.descripcionBreve || '',
+              DESCRIPCION_EXTENSA: item.descripcionExtensa || item.descripcionBreve || '',
               ELEMENTO: item.elemento || '',
-              NOMBRE_TECNICO: item.nombre_tecnico || '',
+              NOMBRE_TECNICO: item.nombreTecnico || '',
               MARCA: item.marca || 'Sin marca',
-              NUMERO_PARTE: item.numero_parte || '—',
+              NUMERO_PARTE: item.numeroParte || '—',
               ENLACE_IMAGEN: '' // Inicializamos vacío para que cargue la de S3 de forma asíncrona
             }));
 
