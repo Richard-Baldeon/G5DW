@@ -1,4 +1,4 @@
-import { Component, NgZone, ChangeDetectorRef } from '@angular/core'; // <-- 1. Importa ChangeDetectorRef
+import { Component, NgZone, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ServicesUploadStorage } from '../../services/upload-storage';
 
@@ -18,7 +18,7 @@ export class ActualizarCatalogo {
   constructor(
     private uploadStorageService: ServicesUploadStorage,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef // <-- 2. Inyéctalo aquí en el constructor
+    private cdr: ChangeDetectorRef
   ) {}
 
   onArchivoSeleccionado(event: Event): void {
@@ -26,12 +26,11 @@ export class ActualizarCatalogo {
     if (input.files && input.files.length > 0) {
       this.archivoSeleccionado = input.files[0];
       this.nombreArchivo = this.archivoSeleccionado.name;
-      this.cdr.detectChanges(); // Fuerza el refresco al seleccionar archivo
+      this.cdr.detectChanges();
     }
   }
 
   subirFotografia(): void {
-    console.log('[COMPONENTE] Botón presionado. Iniciando proceso...');
     this.mensaje = null;
     const codigo = this.codigoSAP.trim();
 
@@ -47,33 +46,59 @@ export class ActualizarCatalogo {
     this.procesando = true;
     const nombreFinalS3 = `${codigo}.jpg`;
 
-    this.uploadStorageService.subirDirectoS3(nombreFinalS3, this.archivoSeleccionado!).subscribe({
-      next: (res) => {
-        console.log('[COMPONENTE - subscribe] ¡Llegó al NEXT! Respuesta final:', res);
+    console.log('[COMPONENTE] Verificando duplicados en S3...');
+
+// ... código anterior igual
+    this.uploadStorageService.verificarExisteArchivo(nombreFinalS3).subscribe({
+      next: () => {
+        // Si responde 200 OK, el archivo definitivamente ya existe en S3
         this.ngZone.run(() => {
           this.procesando = false;
           this.mensaje = {
-            tipo: 'success',
-            texto: `¡Fotografía subida exitosamente como "${nombreFinalS3}" al S3!`
+            tipo: 'danger',
+            texto: `El archivo "${nombreFinalS3}" ya existe en el almacenamiento. Elige otro nombre.`
           };
-          this.codigoSAP = '';
-          this.archivoSeleccionado = null;
-          this.nombreArchivo = '';
-          
-          // <-- 3. OBLIGA A ANGULAR A REDIBUJAR LA INTERFAZ INMEDIATAMENTE
-          this.cdr.detectChanges(); 
+          this.cdr.detectChanges();
         });
       },
-      error: (errS3) => {
-        console.error('[COMPONENTE - subscribe] ¡Cayó en el ERROR!', errS3);
-        this.ngZone.run(() => {
-          this.procesando = false;
-          this.mensaje = { 
-            tipo: 'danger', 
-            texto: 'Falló la subida directa a S3. Verifica el CORS o la política pública del Bucket.' 
-          };
-          this.cdr.detectChanges(); // Fuerza el refresco en caso de error
-        });
+      error: (errExistencia) => {
+        // Aceptamos tanto 404 (No encontrado) como 403 (Ocultado por S3) como señal de que el nombre está libre
+        if (errExistencia.status === 404 || errExistencia.status === 403) {
+          console.log(`[COMPONENTE] Estado ${errExistencia.status} recibido. Nombre libre o disponible para subida.`);
+          
+          // Ejecutar la subida directa
+          this.uploadStorageService.subirDirectoS3(nombreFinalS3, this.archivoSeleccionado!).subscribe({
+            next: () => {
+              this.ngZone.run(() => {
+                this.procesando = false;
+                this.mensaje = {
+                  tipo: 'success',
+                  texto: `¡Fotografía subida exitosamente como "${nombreFinalS3}"!`
+                };
+                this.codigoSAP = '';
+                this.archivoSeleccionado = null;
+                this.nombreArchivo = '';
+                this.cdr.detectChanges();
+              });
+            },
+            error: (errSubida) => {
+              console.error('Error al subir:', errSubida);
+              this.ngZone.run(() => {
+                this.procesando = false;
+                this.mensaje = { tipo: 'danger', texto: 'Falló la subida directa del archivo.' };
+                this.cdr.detectChanges();
+              });
+            }
+          });
+        } else {
+          // Cualquier otro error real de red
+          console.error('Error al verificar existencia:', errExistencia);
+          this.ngZone.run(() => {
+            this.procesando = false;
+            this.mensaje = { tipo: 'danger', texto: 'Error de comunicación con el almacenamiento.' };
+            this.cdr.detectChanges();
+          });
+        }
       }
     });
   }
@@ -83,6 +108,6 @@ export class ActualizarCatalogo {
     this.archivoSeleccionado = null;
     this.nombreArchivo = '';
     this.mensaje = null;
-    this.cdr.detectChanges(); // Fuerza el refresco al cancelar
+    this.cdr.detectChanges();
   }
 }
