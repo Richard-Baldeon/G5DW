@@ -9,7 +9,7 @@
     <div class="card-body p-4">
 
       <p class="text-secondary small mb-4 text-center">
-        Sube una fotografía y asóciala a un repuesto existente mediante su Código SAP.
+        Sube una fotografía. El sistema validará el Código SAP y la guardará automáticamente en el almacenamiento como "codigo.jpg".
       </p>
 
       <!-- Alert -->
@@ -44,7 +44,7 @@
         <!-- File Upload -->
         <div class="mb-4">
           <label class="form-label text-secondary small text-uppercase">Fotografía del Repuesto</label>
-          <div class="upload-area text-center p-4 rounded border border-secondary border-dashed" (click)="fileInput.click()">
+          <div class="upload-area text-center p-4 rounded border border-secondary border-dashed" style="cursor: pointer;" (click)="fileInput.click()">
             @if (nombreArchivo) {
               <i class="bi bi-file-earmark-image text-warning fs-2 d-block mb-2"></i>
               <span class="text-white small">{{ nombreArchivo }}</span>
@@ -63,18 +63,32 @@
         </div>
 
         <!-- Buttons -->
-        <div class="d-grid gap-2">
-          <button type="submit" class="btn btn-warning fw-semibold" [disabled]="procesando">
-            @if (procesando) {
-              <span class="spinner-border spinner-border-sm me-1"></span> Verificando...
-            } @else {
-              <i class="bi bi-upload me-1"></i> Subir Fotografía
-            }
-          </button>
-          <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">
-            Cancelar
-          </button>
-        </div>
+<!-- Buttons -->
+<div class="d-grid gap-2">
+  <button 
+    type="button" 
+    class="btn btn-warning fw-semibold" 
+    [disabled]="procesando" 
+    (click)="subirFotografia()">
+    
+    @if (procesando) {
+      <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <span>Procesando...</span>
+    } @else {
+      <i class="bi bi-upload me-1"></i>
+      <span>Subir Fotografía</span>
+    }
+    
+  </button>
+  
+  <button 
+    type="button" 
+    class="btn btn-outline-secondary" 
+    [disabled]="procesando"
+    (click)="cancelar()">
+    Cancelar
+  </button>
+</div>
 
       </form>
 
